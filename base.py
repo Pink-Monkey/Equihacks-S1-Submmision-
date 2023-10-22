@@ -18,13 +18,19 @@ SCREEN_HEIGHT = 1080
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Equihacks S1 Submission")
 
-
+x = random.choice([0, 1920])
+y = random.choice([10, 1080])
 
 #define colours
 BG = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 pizza_original = pygame.image.load('img/pizzacursor.png')
+
+asteroid = pygame.image.load('img/lemon-removebg-preview.png')
+asteroid_list = []
+
+
 
 run = True
 
@@ -37,7 +43,8 @@ DEFAULT_Cookie_SIZE = (15, 15)
 # Scale the image to your needed sixe
 pizza_original = pygame.transform.scale(pizza_original, DEFAULT_IMAGE_SIZE)
 
-
+x = [10, 1910]
+y = []
 
 
 bullet = pygame.image.load('img/cookie-removebg-preview.png').convert_alpha()
@@ -47,6 +54,21 @@ bullet_list = []
 #game loop
 
 angle = 0
+if angle > 0:
+ asteroid_angle = angle * -1
+
+def asteroid_create(asteroid_angle):
+  asteroid_rect = asteroid.get_rect(random.choice(x), random.radiant(y))
+  asteroid_list.append([asteroid, asteroid_rect, asteroid_angle])
+
+def asteroid_render():
+  for asteroid in asteroid_list:
+    screen.blit(asteroid[0], asteroid[1])
+
+def asteroid_move():
+  for asteroid in asteroid_list:
+    bullet[1] = bullet[1].move(speed * math.cos(bullet[2]) , -1* speed * math.sin(bullet[2]))
+ 
 
 def bullet_create(angle):
   bullet_rect = bullet.get_rect(center = (pizza_position[0],pizza_position[1]))
@@ -59,7 +81,6 @@ def bullet_render():
   for bullet in bullet_list:
     screen.blit(bullet[0], bullet[1])
   """Go through the list of bullets and render each bullet"""
-  pass
 
 def pizza_move(angle, x_dist, y_dist):
   if math.sqrt(x_dist**2 + y_dist**2) > 10:
