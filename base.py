@@ -6,7 +6,8 @@ import random
 pizza_position = [960, 540]
 
 pygame.init()
-
+score = 0
+health = 3
 
 
 
@@ -18,33 +19,37 @@ SCREEN_HEIGHT = 1080
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Equihacks S1 Submission")
 
-x = random.choice([0, 1920])
-y = random.choice([10, 1080])
 
 #define colours
+pygame.mouse.set_visible(False)
 BG = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 pizza_original = pygame.image.load('img/pizzacursor.png')
+cursor_img = pygame.image.load('img/peppermint-removebg-preview.png')
 
-asteroid = pygame.image.load('img/lemon-removebg-preview.png')
+
+asteroid_l1 = pygame.image.load('img/lemon-removebg-preview.png')
+asteroid_l2 = pygame.image.load('img/redlemon-removebg-preview.png')
 asteroid_list = []
 
 
 
 run = True
 
-speed = 2
+speed = 4
+asteroid_speed = 3
 pizza_speed = 0
 
 DEFAULT_IMAGE_SIZE = (80, 80)
 DEFAULT_Cookie_SIZE = (15, 15)
- 
+DEAFULT_CURSOR_SIZE = (32, 32)
 # Scale the image to your needed sixe
 pizza_original = pygame.transform.scale(pizza_original, DEFAULT_IMAGE_SIZE)
+cursor_img = pygame.transform.scale(cursor_img, DEAFULT_CURSOR_SIZE)
 
 x = [10, 1910]
-y = []
+y = [10, 1070]
 
 
 bullet = pygame.image.load('img/cookie-removebg-preview.png').convert_alpha()
@@ -54,12 +59,38 @@ bullet_list = []
 #game loop
 
 angle = 0
-if angle > 0:
- asteroid_angle = angle * -1
 
-def asteroid_create(asteroid_angle):
-  asteroid_rect = asteroid.get_rect(random.choice(x), random.radiant(y))
-  asteroid_list.append([asteroid, asteroid_rect, asteroid_angle])
+def asteroid_bullet_collision(score):
+  for idb, bullet in enumerate(bullet_list): 
+    for ida, asteroid in enumerate(asteroid_list):
+      if bullet[1].colliderect(asteroid[1]) and asteroid[3] == asteroid_l1:
+        score += 10
+
+        bullet_list.pop(idb)
+        asteroid_list.pop(ida)
+        asteroid_create(30, 59, asteroid_l2) 
+        asteroid_create(30, 59, asteroid_l2) 
+      if bullet[1].colliderect(asteroid[1]) and asteroid[3] == asteroid_l2:
+        score += 50
+        bullet_list.pop(idb)
+        asteroid_list.pop(ida)
+  return score
+
+
+
+
+def asteroid_create(low_size, high_size, costume_type):
+  if random.random() < 0.05:
+    location_x_asteroid=random.choice(x)
+    location_y_asteroid=random.randrange(y[0], y[1])
+    size_asteroid = random.randrange(low_size, high_size)
+    DEAFULT_ASTEROID_SIZE = (size_asteroid, size_asteroid)
+    x_dist = location_x_asteroid - pizza_position[0]
+    y_dist = location_y_asteroid - pizza_position[1]
+    asteroid_angle = math.degrees(math.atan2(y_dist, x_dist))
+    asteroid = pygame.transform.scale(costume_type, DEAFULT_ASTEROID_SIZE)
+    asteroid_rect = asteroid.get_rect(center = (random.choice(x), random.randrange(y[0], y[1])))  
+    asteroid_list.append([asteroid, asteroid_rect, asteroid_angle + 180, costume_type])
 
 def asteroid_render():
   for asteroid in asteroid_list:
@@ -67,7 +98,7 @@ def asteroid_render():
 
 def asteroid_move():
   for asteroid in asteroid_list:
-    bullet[1] = bullet[1].move(speed * math.cos(bullet[2]) , -1* speed * math.sin(bullet[2]))
+    asteroid[1] = asteroid[1].move(asteroid_speed * math.cos(asteroid[2]) , -1* speed * math.sin(asteroid[2]))
  
 
 def bullet_create(angle):
@@ -99,7 +130,9 @@ while run:
   screen.fill(BLACK)
   #get mouse position
   pos = pygame.mouse.get_pos()
+  screen.blit(cursor_img, pos)
 
+  
   x_dist = pos[0] - pizza_position[0]
   y_dist = -(pos[1] - pizza_position[1])#-ve because pygame y coordinates increase down the screen
   angle = math.degrees(math.atan2(y_dist, x_dist))
@@ -118,13 +151,17 @@ while run:
 
   bullet_move()
   bullet_render()
+
+  asteroid_create(60, 100, asteroid_l1)
+  asteroid_render()
+  asteroid_move()
   
-  
+  score = asteroid_bullet_collision(score)
   
   #update display
   pygame.display.flip()
 
-  #event handler
+  #event handlerbullet
   for event in pygame.event.get():
     #quit program
     if event.type == pygame.QUIT:
@@ -138,6 +175,8 @@ while run:
       if event.key == pygame.K_DOWN:
         if pizza_speed + 3 < 0:
           pizza_speed += 2
+
+  print(score)
 
   
 
